@@ -123,7 +123,7 @@
 </head>
 <body>
 
-<!--   <div class="container">
+  <div class="container">
     <h2><i class="fas fa-lock icon"></i> Password Vault</h2>
 
     <div id="login">
@@ -131,7 +131,7 @@
       <br>
       <button onclick="checkLogin()"><i class="fas fa-sign-in-alt icon"></i> Login</button>
       <p id="loginError"></p>
-    </div> -->
+    </div>
 
     <div id="dashboard">
       <h3><i class="fas fa-database icon"></i> Saved Credentials</h3>
@@ -174,18 +174,18 @@
     const db = firebase.firestore();
     console.log("Firebase connected");
 
-    // const MASTER_KEY = "zebra"; // Change this securely!
+    const MASTER_KEY = "zebra"; // Change this securely!
 
-    // function checkLogin() {
-    //   const key = document.getElementById("loginKey").value;
-    //   if (key === MASTER_KEY) {
-    //     document.getElementById("login").style.display = "none";
-    //     document.getElementById("dashboard").style.display = "block";
-    //     loadData();
-    //   } else {
-    //     document.getElementById("loginError").innerText = "Invalid access key!";
-    //   }
-    // }
+    function checkLogin() {
+      const key = document.getElementById("loginKey").value;
+      if (key == MASTER_KEY) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadData();
+      } else {
+        document.getElementById("loginError").innerText = "Invalid access key!";
+      }
+    }
 
     function loadData() {
       const tbody = document.querySelector("#dataTable tbody");
