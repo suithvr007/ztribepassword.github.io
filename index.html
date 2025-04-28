@@ -174,18 +174,18 @@
     const db = firebase.firestore();
     console.log("Firebase connected");
 
-    const MASTER_KEY = "zebra"; // Change this securely!
+    // const MASTER_KEY = "zebra"; // Change this securely!
 
-    function checkLogin() {
-      const key = document.getElementById("loginKey").value;
-      if (key === MASTER_KEY) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        loadData();
-      } else {
-        document.getElementById("loginError").innerText = "Invalid access key!";
-      }
-    }
+    // function checkLogin() {
+    //   const key = document.getElementById("loginKey").value;
+    //   if (key === MASTER_KEY) {
+    //     document.getElementById("login").style.display = "none";
+    //     document.getElementById("dashboard").style.display = "block";
+    //     loadData();
+    //   } else {
+    //     document.getElementById("loginError").innerText = "Invalid access key!";
+    //   }
+    // }
 
     function loadData() {
       const tbody = document.querySelector("#dataTable tbody");
