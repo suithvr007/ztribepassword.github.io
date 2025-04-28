@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Password Vault</title>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js"></script>
 
-  <!-- Font Awesome -->
+  <!-- Icons -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
-  <!-- Style -->
+  <!-- Styling -->
   <style>
     :root {
-      --bg: #f8f9fa;
-      --primary: #343a40;
-      --accent: #007bff;
+      --bg: #f0f2f5;
+      --primary: #2c3e50;
+      --accent: #3498db;
       --card: #ffffff;
-      --danger: #dc3545;
-    }
-
-    * {
-      box-sizing: border-box;
+      --danger: #e74c3c;
+      --shadow: rgba(0, 0, 0, 0.1);
     }
 
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
+      margin: 0;
       background: var(--bg);
       color: var(--primary);
       padding: 2rem;
@@ -37,44 +34,42 @@
       max-width: 900px;
       margin: auto;
       background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow);
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     #login {
       text-align: center;
     }
 
-    #login input {
-      padding: 0.6rem 1rem;
+    input, button {
+      padding: 10px;
       font-size: 1rem;
-      width: 250px;
-      margin-bottom: 1rem;
+      margin: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
 
-    #login button {
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
+    button {
       background: var(--accent);
       color: white;
       border: none;
-      border-radius: 6px;
       cursor: pointer;
     }
 
-    #login button:hover {
-      background: #0056b3;
+    button:hover {
+      background: #2b7bbd;
     }
 
     #loginError {
       color: var(--danger);
-      margin-top: 0.5rem;
+      margin-top: 1rem;
     }
 
     #dashboard {
@@ -84,11 +79,11 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      margin-top: 2rem;
     }
 
     th, td {
-      padding: 12px 16px;
+      padding: 12px;
       border-bottom: 1px solid #ddd;
       text-align: left;
     }
@@ -100,18 +95,19 @@
 
     td input {
       width: 100%;
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 8px;
     }
 
-    td a {
-      color: var(--accent);
-      text-decoration: none;
+    .form-inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
     }
 
-    td a:hover {
-      text-decoration: underline;
+    .form-inline input {
+      flex: 1;
+      min-width: 150px;
     }
 
     .icon {
@@ -119,62 +115,42 @@
     }
 
     @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
+      .form-inline {
+        flex-direction: column;
       }
-
-      tr {
-        margin-bottom: 1rem;
-      }
-
-      th, td {
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-      }
-
-      th::before, td::before {
-        position: absolute;
-        left: 16px;
-        width: 45%;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: bold;
-      }
-
-      th:nth-child(1)::before { content: "Website"; }
-      th:nth-child(2)::before { content: "Username"; }
-      th:nth-child(3)::before { content: "Password"; }
-      th:nth-child(4)::before { content: "Link"; }
-
-      td:nth-child(1)::before { content: "Website"; }
-      td:nth-child(2)::before { content: "Username"; }
-      td:nth-child(3)::before { content: "Password"; }
-      td:nth-child(4)::before { content: "Link"; }
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2><i class="fas fa-lock icon"></i>Password Vault</h2>
+    <h2><i class="fas fa-lock icon"></i> Password Vault</h2>
 
     <div id="login">
       <input type="password" id="loginKey" placeholder="Enter Access Key" />
       <br>
-      <button onclick="checkLogin()"><i class="fas fa-sign-in-alt icon"></i>Login</button>
+      <button onclick="checkLogin()"><i class="fas fa-sign-in-alt icon"></i> Login</button>
       <p id="loginError"></p>
     </div>
 
     <div id="dashboard">
-      <h3><i class="fas fa-database icon"></i>Stored Credentials</h3>
+      <h3><i class="fas fa-database icon"></i> Saved Credentials</h3>
+
+      <div class="form-inline">
+        <input type="text" id="newWebsite" placeholder="Website" />
+        <input type="text" id="newUsername" placeholder="Username" />
+        <input type="text" id="newPassword" placeholder="Password" />
+        <input type="text" id="newLink" placeholder="Website Link" />
+        <button onclick="addAccount()">Add</button>
+      </div>
+
       <table id="dataTable">
         <thead>
           <tr>
-            <th><i class="fas fa-globe icon"></i>Website</th>
-            <th><i class="fas fa-user icon"></i>Username</th>
-            <th><i class="fas fa-key icon"></i>Password</th>
-            <th><i class="fas fa-link icon"></i>Link</th>
+            <th>Website</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Link</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -183,6 +159,7 @@
   </div>
 
   <script>
+    // Replace with your own Firebase config
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -191,22 +168,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const MASTER_KEY = "zebatribe"; // Change this to your access key
+    const MASTER_KEY = "zebra"; // Change this securely!
 
     function checkLogin() {
-      const inputKey = document.getElementById("loginKey").value;
-      if (inputKey === MASTER_KEY) {
+      const key = document.getElementById("loginKey").value;
+      if (key === MASTER_KEY) {
         document.getElementById("login").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
         loadData();
       } else {
-        document.getElementById("loginError").innerText = "Invalid Key!";
+        document.getElementById("loginError").innerText = "Invalid access key!";
       }
     }
 
     function loadData() {
       const tbody = document.querySelector("#dataTable tbody");
-      db.collection("accounts").onSnapshot((snapshot) => {
+      db.collection("accounts").onSnapshot(snapshot => {
         tbody.innerHTML = "";
         snapshot.forEach(doc => {
           const data = doc.data();
@@ -216,10 +193,11 @@
             <td>${data.website}</td>
             <td>${data.username}</td>
             <td>
-              <input type="password" value="${data.password}" onchange="updatePassword('${doc.id}', this.value)" />
+              <input type="text" value="${data.password}" onchange="updatePassword('${doc.id}', this.value)" />
             </td>
-            <td><a href="${data.link}" target="_blank"><i class="fas fa-external-link-alt icon"></i>Visit</a></td>
+            <td><a href="${data.link}" target="_blank"><i class="fas fa-external-link-alt"></i> Visit</a></td>
           `;
+
           tbody.appendChild(tr);
         });
       });
@@ -228,7 +206,27 @@
     function updatePassword(docId, newPassword) {
       db.collection("accounts").doc(docId).update({ password: newPassword })
         .then(() => console.log("Password updated"))
-        .catch(err => console.error("Error updating:", err));
+        .catch(err => console.error("Update error:", err));
+    }
+
+    function addAccount() {
+      const website = document.getElementById("newWebsite").value;
+      const username = document.getElementById("newUsername").value;
+      const password = document.getElementById("newPassword").value;
+      const link = document.getElementById("newLink").value;
+
+      if (website && username && password && link) {
+        db.collection("accounts").add({ website, username, password, link })
+          .then(() => {
+            document.getElementById("newWebsite").value = "";
+            document.getElementById("newUsername").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("newLink").value = "";
+          })
+          .catch(err => console.error("Add error:", err));
+      } else {
+        alert("Please fill all fields.");
+      }
     }
   </script>
 
