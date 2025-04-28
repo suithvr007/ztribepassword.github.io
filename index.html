@@ -5,8 +5,8 @@
   <title>Password Vault</title>
 
   <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"></script>
 
   <!-- Icons -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -169,8 +169,10 @@
     appId: "1:326302828139:web:8f1a856fde52b26fb5d32e",
     measurementId: "G-G1NNTMSGE6"
     };
+    console.log("Connecting to Firebase...");
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    console.log("Firebase connected");
 
     const MASTER_KEY = "zebra"; // Change this securely!
 
