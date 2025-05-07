@@ -2,240 +2,364 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Password Vault</title>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
-  <!-- Icons -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TUT Password Vault</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Styling -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f0f2f5;
-      --primary: #2c3e50;
-      --accent: #3498db;
-      --card: #ffffff;
-      --danger: #e74c3c;
-      --shadow: rgba(0, 0, 0, 0.1);
-    }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
       margin: 0;
-      background: var(--bg);
-      color: var(--primary);
-      padding: 2rem;
+      padding: 0;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 800px;
       margin: auto;
-      background: var(--card);
-      padding: 2rem;
+      padding: 20px;
+    }
+
+    h2, h3 {
+      color: #00796b;
+      font-weight: 500;
+    }
+
+    .card {
+      background-color: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px var(--shadow);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 2rem;
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
-    #login {
-      text-align: center;
-    }
-
-    input, button {
-      padding: 10px;
-      font-size: 1rem;
-      margin: 6px;
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 10px 0;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
+      background-color: #ffffff;
+      color: #333;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      background-color: #f0f0f0;
+      border-color: #00796b;
+    }
+
+    .password-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .password-container input {
+      width: 100%;
+      padding-right: 90px; 
+      box-sizing: border-box;
+    }
+
+    .password-actions {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .password-actions i {
+      cursor: pointer;
+      color: #00796b;
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .password-actions i:hover {
+      transform: scale(1.2);
     }
 
     button {
-      background: var(--accent);
-      color: white;
+      padding: 10px 20px;
+      background-color: #00796b;
+      color: #fff;
       border: none;
+      border-radius: 6px;
+      font-size: 1em;
       cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
     }
 
     button:hover {
-      background: #2b7bbd;
+      background-color: #004d40;
+      transform: scale(1.05);
     }
 
-    #loginError {
-      color: var(--danger);
-      margin-top: 1rem;
+    .last-changed {
+      font-size: 0.85em;
+      color: #777;
     }
 
-    #dashboard {
-      display: none;
+    a {
+      color: #00796b;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 2rem;
+    a:hover {
+      text-decoration: underline;
     }
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
+    /* Chatbot styles */
+    #chatbot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-family: 'Roboto', sans-serif;
+      z-index: 1000;
     }
 
-    th {
-      background: var(--primary);
+    #chat-toggle {
+      background: #00796b;
       color: white;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
-    td input {
+    #chat-box {
+      width: 280px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+
+    #chat-messages {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      font-size: 0.95em;
+    }
+
+    #chat-input {
       width: 100%;
-      padding: 8px;
-    }
-
-    .form-inline {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 1.5rem;
-    }
-
-    .form-inline input {
-      flex: 1;
-      min-width: 150px;
-    }
-
-    .icon {
-      margin-right: 6px;
-    }
-
-    @media (max-width: 600px) {
-      .form-inline {
-        flex-direction: column;
-      }
+      padding: 10px;
+      border: none;
+      border-top: 1px solid #ccc;
+      outline: none;
     }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <h2><i class="fas fa-lock icon"></i> Password Vault</h2>
-
-    <div id="login">
-      <input type="password" id="loginKey" placeholder="Enter Access Key" />
-      <br>
-      <button onclick="checkLogin()"><i class="fas fa-sign-in-alt icon"></i> Login</button>
-      <p id="loginError"></p>
+    <div id="loginDiv">
+      <h2>🔐 Login With Key </h2>
+      <input type="password" id="accessKey" placeholder="Enter Access Key" />
+      <button onclick="checkAccessKey()" id="login">Login</button>
     </div>
 
-    <div id="dashboard">
-      <h3><i class="fas fa-database icon"></i> Saved Credentials</h3>
+    <div id="vaultDiv" style="display: none;">
+      <h2>🔒 TUT Password Vault</h2>
+      <div id="accountList"></div>
 
-      <div class="form-inline">
-        <input type="text" id="newWebsite" placeholder="Website" />
-        <input type="text" id="newUsername" placeholder="Username" />
-        <input type="text" id="newPassword" placeholder="Password" />
-        <input type="text" id="newLink" placeholder="Website Link" />
-        <button onclick="addAccount()">Add</button>
-      </div>
-
-      <table id="dataTable">
-        <thead>
-          <tr>
-            <th>Website</th>
-            <th>Username</th>
-            <th>Password</th>
-            <th>Link</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <h3>Add New Entry</h3>
+      <input type="text" id="newUsername" placeholder="Username" />
+      <input type="text" id="newPassword" placeholder="Password" />
+      <input type="text" id="newWebsite" placeholder="Website URL" />
+      <input type="text" id="newPasswordDetails" placeholder="Password Details" />
+      <button onclick="addNewEntry()" id="NewEntry">Add Entry</button>
     </div>
   </div>
 
+  <!-- Floating chatbot -->
+  <div id="chatbot">
+    <div id="chat-toggle" onclick="toggleChat()">💬</div>
+    <div id="chat-box" style="display: none;">
+      <div id="chat-messages"></div>
+      <input type="text" id="chat-input" placeholder="Ask me anything..." onkeydown="handleChat(event)" />
+    </div>
+  </div>
+
+  <!-- Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
   <script>
-    // Replace with your own Firebase config
-    const firebaseConfig = {
-    apiKey: "AIzaSyAdQXobYdViArKQqLn2GYa1hzzhPU2YTwI",
-    authDomain: "zebrapassword.firebaseapp.com",
-    projectId: "zebrapassword",
-    storageBucket: "zebrapassword.firebasestorage.app",
-    messagingSenderId: "326302828139",
-    appId: "1:326302828139:web:8f1a856fde52b26fb5d32e",
-    measurementId: "G-G1NNTMSGE6"
+    var firebaseConfig = {
+      apiKey: "AIzaSyAdQXobYdViArKQqLn2GYa1hzzhPU2YTwI",
+      authDomain: "zebrapassword.firebaseapp.com",
+      projectId: "zebrapassword",
+      storageBucket: "zebrapassword.firebasestorage.app",
+      messagingSenderId: "326302828139",
+      appId: "1:326302828139:web:8f1a856fde52b26fb5d32e",
+      measurementId: "G-G1NNTMSGE6"
     };
-    console.log("Connecting to Firebase...");
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    console.log("Firebase connected");
+    var db = firebase.firestore();
 
-    const MASTER_KEY = "zebra"; // Change this securely!
+    const accessKey = "ztribe";
 
-    function checkLogin() {
-      const key = document.getElementById("loginKey").value;
-      if (key == MASTER_KEY) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        loadData();
+    function checkAccessKey() {
+      const inputKey = document.getElementById("accessKey").value;
+      if (inputKey === accessKey) {
+        document.getElementById("loginDiv").style.display = "none";
+        document.getElementById("vaultDiv").style.display = "block";
+        loadAccounts();
       } else {
-        document.getElementById("loginError").innerText = "Invalid access key!";
+        alert("Incorrect access key.");
       }
     }
 
-    function loadData() {
-      const tbody = document.querySelector("#dataTable tbody");
-      db.collection("accounts").onSnapshot(snapshot => {
-        tbody.innerHTML = "";
+    function loadAccounts() {
+      db.collection("accounts").orderBy("lastChanged", "desc").onSnapshot(snapshot => {
+        const listDiv = document.getElementById("accountList");
+        listDiv.innerHTML = "";
         snapshot.forEach(doc => {
           const data = doc.data();
-          const tr = document.createElement("tr");
+          const lastChanged = data.lastChanged?.toDate().toLocaleString() || "N/A";
+          const card = document.createElement("div");
+          card.className = "card";
+          const inputId = `pass-${doc.id}`;
 
-          tr.innerHTML = `
-            <td>${data.website}</td>
-            <td>${data.username}</td>
-            <td>
-              <input type="text" value="${data.password}" onchange="updatePassword('${doc.id}', this.value)" />
-            </td>
-            <td><a href="${data.link}" target="_blank"><i class="fas fa-external-link-alt"></i> Visit</a></td>
+          card.innerHTML = `
+            <p><strong>👤 Username:</strong> ${data.username}</p>
+            <p><strong>🌐 Website:</strong> <a href="${data.website}" target="_blank">${data.website}</a></p>
+            <p><strong>🔑 Password:</strong></p>
+            <div class="password-container">
+              <input type="password" value="${data.password}" id="${inputId}" onchange="updatePassword('${doc.id}')" />
+              <div class="password-actions">
+                <i class="fas fa-eye" onclick="toggleVisibility('${inputId}', this)"></i>
+                <i class="fas fa-copy" onclick="copyPassword('${inputId}')"></i>
+              </div>
+            </div>
+            <p><strong>📝 Password Details:</strong> ${data.passwordDetails}</p>
+            <p class="last-changed">🕒 Last Updated: ${lastChanged}</p>
           `;
-
-          tbody.appendChild(tr);
+          listDiv.appendChild(card);
         });
       });
     }
 
-    function updatePassword(docId, newPassword) {
-      db.collection("accounts").doc(docId).update({ password: newPassword })
-        .then(() => console.log("Password updated"))
-        .catch(err => console.error("Update error:", err));
-    }
-
-    function addAccount() {
-      const website = document.getElementById("newWebsite").value;
-      const username = document.getElementById("newUsername").value;
-      const password = document.getElementById("newPassword").value;
-      const link = document.getElementById("newLink").value;
-
-      if (website && username && password && link) {
-        db.collection("accounts").add({ website, username, password, link })
-          .then(() => {
-            document.getElementById("newWebsite").value = "";
-            document.getElementById("newUsername").value = "";
-            document.getElementById("newPassword").value = "";
-            document.getElementById("newLink").value = "";
-          })
-          .catch(err => console.error("Add error:", err));
+    function toggleVisibility(id, icon) {
+      const field = document.getElementById(id);
+      if (field.type === "password") {
+        field.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+        setTimeout(() => {
+          field.type = "password";
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        }, 5000);
       } else {
-        alert("Please fill all fields.");
+        field.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
       }
     }
-  </script>
 
+    function copyPassword(id) {
+      const field = document.getElementById(id);
+      field.type = "text"; 
+      field.select();
+      document.execCommand("copy");
+      field.type = "password";
+      alert("Password copied to clipboard!");
+    }
+
+    function updatePassword(id) {
+      const newPass = document.getElementById(`pass-${id}`).value;
+      db.collection("accounts").doc(id).update({
+        password: newPass,
+        lastChanged: firebase.firestore.Timestamp.now()
+      });
+    }
+
+    function addNewEntry() {
+      const username = document.getElementById("newUsername").value;
+      const password = document.getElementById("newPassword").value;
+      const website = document.getElementById("newWebsite").value;
+      const passwordDetails = document.getElementById("newPasswordDetails").value;
+
+      if (!username || !password || !website || !passwordDetails) {
+        alert("All fields are required!");
+        return;
+      }
+
+      db.collection("accounts").add({
+        username,
+        password,
+        website,
+        passwordDetails,
+        lastChanged: firebase.firestore.Timestamp.now()
+      });
+
+      document.getElementById("newUsername").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("newWebsite").value = "";
+      document.getElementById("newPasswordDetails").value = "";
+    }
+
+    // Chatbot logic
+    const keywordResponses = {
+      "reset": "🔗 Here's how to reset your password: https://example.com/reset-password",
+      "forgot": "🔗 Forgot your password? Try this: https://example.com/forgot",
+      "security": "🔐 Check our security tips here: https://example.com/security-tips",
+      "export": "📤 Export your vault from here: https://example.com/export-guide"
+    };
+
+    function toggleChat() {
+      const box = document.getElementById("chat-box");
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    }
+
+    function handleChat(event) {
+      if (event.key === "Enter") {
+        const input = document.getElementById("chat-input");
+        const message = input.value.trim().toLowerCase();
+        if (!message) return;
+
+        addChatMessage("🧑‍💻 You: " + message);
+
+        let found = false;
+        for (const key in keywordResponses) {
+          if (message.includes(key)) {
+            addChatMessage("🤖 Bot: " + keywordResponses[key]);
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          addChatMessage("🤖 Bot: Sorry, I don't recognize that. Try keywords like 'reset', 'forgot', or 'security'.");
+        }
+
+        input.value = "";
+      }
+    }
+
+    function addChatMessage(text) {
+      const msgDiv = document.getElementById("chat-messages");
+      const p = document.createElement("p");
+      p.textContent = text;
+      msgDiv.appendChild(p);
+      msgDiv.scrollTop = msgDiv.scrollHeight;
+    }
+  </script>
 </body>
 </html>
