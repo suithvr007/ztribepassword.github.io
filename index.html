@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TUT Password Vault</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -64,9 +64,7 @@
     }
 
     .password-container input {
-      width: 100%;
-      padding-right: 90px; 
-      box-sizing: border-box;
+      padding-right: 90px;
     }
 
     .password-actions {
@@ -120,56 +118,78 @@
     }
 
     /* Chatbot styles */
-    #chatbot {
+    .chatbot-container {
       position: fixed;
       bottom: 20px;
       right: 20px;
+      width: 300px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       font-family: 'Roboto', sans-serif;
-      z-index: 1000;
-    }
-
-    #chat-toggle {
-      background: #00796b;
-      color: white;
-      padding: 12px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.5rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    #chat-box {
-      width: 280px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      margin-bottom: 10px;
+      z-index: 9999;
     }
 
-    #chat-messages {
+    .chatbot-header {
+      background-color: #00796b;
+      color: #fff;
+      padding: 10px 15px;
+      font-weight: bold;
+    }
+
+    .chatbot-messages {
       max-height: 200px;
       overflow-y: auto;
       padding: 10px;
       font-size: 0.95em;
     }
 
-    #chat-input {
-      width: 100%;
+    .chatbot-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    .chatbot-input input {
+      flex: 1;
       padding: 10px;
       border: none;
-      border-top: 1px solid #ccc;
       outline: none;
+      font-size: 1em;
+    }
+
+    .chatbot-input button {
+      padding: 10px 15px;
+      background-color: #00796b;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .chatbot-input button:hover {
+      background-color: #004d40;
+    }
+
+    .chat-message {
+      margin-bottom: 8px;
+    }
+
+    .chat-message.user {
+      text-align: right;
+      color: #00796b;
+    }
+
+    .chat-message.bot {
+      text-align: left;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div id="loginDiv">
-      <h2>🔐 Login With Key </h2>
+      <h2>🔐 Login With Key</h2>
       <input type="password" id="accessKey" placeholder="Enter Access Key" />
-      <button onclick="checkAccessKey()" id="login">Login</button>
+      <button onclick="checkAccessKey()">Login</button>
     </div>
 
     <div id="vaultDiv" style="display: none;">
@@ -181,23 +201,23 @@
       <input type="text" id="newPassword" placeholder="Password" />
       <input type="text" id="newWebsite" placeholder="Website URL" />
       <input type="text" id="newPasswordDetails" placeholder="Password Details" />
-      <button onclick="addNewEntry()" id="NewEntry">Add Entry</button>
+      <button onclick="addNewEntry()">Add Entry</button>
     </div>
   </div>
 
-  <!-- Floating chatbot -->
-  <div id="chatbot">
-    <div id="chat-toggle" onclick="toggleChat()">💬</div>
-    <div id="chat-box" style="display: none;">
-      <div id="chat-messages"></div>
-      <input type="text" id="chat-input" placeholder="Ask me anything..." onkeydown="handleChat(event)" />
+  <!-- Chatbot -->
+  <div class="chatbot-container">
+    <div class="chatbot-header">🤖 Help Bot</div>
+    <div class="chatbot-messages" id="chatMessages"></div>
+    <div class="chatbot-input">
+      <input type="text" id="chatInput" placeholder="Ask something..." onkeydown="if(event.key==='Enter') sendChat()" />
+      <button onclick="sendChat()">Send</button>
     </div>
   </div>
 
-  <!-- Firebase scripts -->
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
   <script>
     var firebaseConfig = {
@@ -232,10 +252,9 @@
         snapshot.forEach(doc => {
           const data = doc.data();
           const lastChanged = data.lastChanged?.toDate().toLocaleString() || "N/A";
+          const inputId = `pass-${doc.id}`;
           const card = document.createElement("div");
           card.className = "card";
-          const inputId = `pass-${doc.id}`;
-
           card.innerHTML = `
             <p><strong>👤 Username:</strong> ${data.username}</p>
             <p><strong>🌐 Website:</strong> <a href="${data.website}" target="_blank">${data.website}</a></p>
@@ -275,7 +294,7 @@
 
     function copyPassword(id) {
       const field = document.getElementById(id);
-      field.type = "text"; 
+      field.type = "text";
       field.select();
       document.execCommand("copy");
       field.type = "password";
@@ -315,50 +334,41 @@
       document.getElementById("newPasswordDetails").value = "";
     }
 
-    // Chatbot logic
+    // Chatbot Logic
     const keywordResponses = {
-      "reset": "🔗 Here's how to reset your password: https://example.com/reset-password",
-      "forgot": "🔗 Forgot your password? Try this: https://example.com/forgot",
-      "security": "🔐 Check our security tips here: https://example.com/security-tips",
-      "export": "📤 Export your vault from here: https://example.com/export-guide"
+      "Factoryreset": "🔗 Here is your FR barcode: https://zebra.sharepoint.com/:b:/r/sites/TUT/Shared%20Documents/StagenowBarcode/PowerMgr/FactoryReset.pdf?csf=1&web=1&e=ZctMUt",
+      "FR": "🔗 Here is your FR barcode: https://zebra.sharepoint.com/:b:/r/sites/TUT/Shared%20Documents/StagenowBarcode/PowerMgr/FactoryReset.pdf?csf=1&web=1&e=ZctMUt",
+      "Enterprise Reset": "🔗 Here is your ER barcode: https://zebra.sharepoint.com/:b:/r/sites/TUT/Shared%20Documents/StagenowBarcode/PowerMgr/EnterpriseReset.pdf?csf=1&web=1&e=SDbNyn",
+      "ER": ""🔗 Here is your ER barcode: https://zebra.sharepoint.com/:b:/r/sites/TUT/Shared%20Documents/StagenowBarcode/PowerMgr/EnterpriseReset.pdf?csf=1&web=1&e=SDbNyn"",
+      
     };
 
-    function toggleChat() {
-      const box = document.getElementById("chat-box");
-      box.style.display = box.style.display === "none" ? "block" : "none";
-    }
+    function sendChat() {
+      const input = document.getElementById("chatInput");
+      const message = input.value.trim().toLowerCase();
+      if (!message) return;
 
-    function handleChat(event) {
-      if (event.key === "Enter") {
-        const input = document.getElementById("chat-input");
-        const message = input.value.trim().toLowerCase();
-        if (!message) return;
+      const messagesDiv = document.getElementById("chatMessages");
+      const userMsg = document.createElement("div");
+      userMsg.className = "chat-message user";
+      userMsg.textContent = message;
+      messagesDiv.appendChild(userMsg);
 
-        addChatMessage("🧑‍💻 You: " + message);
-
-        let found = false;
-        for (const key in keywordResponses) {
-          if (message.includes(key)) {
-            addChatMessage("🤖 Bot: " + keywordResponses[key]);
-            found = true;
-            break;
-          }
+      let response = "❓ Sorry, I didn’t understand that. Try keywords like ‘FR’, ‘ER’, or ‘FactotyReset’.";
+      for (const keyword in keywordResponses) {
+        if (message.includes(keyword)) {
+          response = keywordResponses[keyword];
+          break;
         }
-
-        if (!found) {
-          addChatMessage("🤖 Bot: Sorry, I don't recognize that. Try keywords like 'reset', 'forgot', or 'security'.");
-        }
-
-        input.value = "";
       }
-    }
 
-    function addChatMessage(text) {
-      const msgDiv = document.getElementById("chat-messages");
-      const p = document.createElement("p");
-      p.textContent = text;
-      msgDiv.appendChild(p);
-      msgDiv.scrollTop = msgDiv.scrollHeight;
+      const botMsg = document.createElement("div");
+      botMsg.className = "chat-message bot";
+      botMsg.innerHTML = response;
+      messagesDiv.appendChild(botMsg);
+
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      input.value = "";
     }
   </script>
 </body>
